@@ -13,6 +13,10 @@ import java.util.Properties;
  */
 public class TableConfiguration {
     /**
+     * 配置文件位置
+     */
+    private String propertyName;
+    /**
      * 实体类生成所在包的路径
      */
     private String packageOutPath;
@@ -52,10 +56,11 @@ public class TableConfiguration {
     /**
      * 构造，初始化
      */
-    public TableConfiguration() {
+    private TableConfiguration(String propertyName) {
+        this.propertyName = propertyName;
         // 使用Properties类读取reverse.properties配置文件
         Properties properties = new Properties();
-        try (InputStream inputStream = getClass().getResourceAsStream("../resource/reverse.properties")) {
+        try (InputStream inputStream = getClass().getResourceAsStream(propertyName)) {
             properties.load(inputStream);
         } catch (IOException e) {
             System.out.println("没找到这个配置文件 " + e);
@@ -83,17 +88,17 @@ public class TableConfiguration {
         fUtil = false;
         fSql = false;
         String sql = "SELECT * FROM " + tableName;
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            ResultSetMetaData rsmd = pstmt.getMetaData();
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            ResultSetMetaData setMetaData = preparedStatement.getMetaData();
             // 统计字段（列）
-            int size = rsmd.getColumnCount();
+            int size = setMetaData.getColumnCount();
             columnNames = new ArrayList<>();
             columnTypeNames = new ArrayList<>();
 
             for (int i = 0; i < size; i++) {
-                columnNames.add(rsmd.getColumnName(i + 1));
-                columnTypeNames.add(rsmd.getColumnTypeName(i + 1));
-                if ("datetime".equalsIgnoreCase(columnTypeNames.get(i))) {
+                columnNames.add(setMetaData.getColumnName(i + 1));
+                columnTypeNames.add(setMetaData.getColumnTypeName(i + 1));
+                if ("DATETIME".equalsIgnoreCase(columnTypeNames.get(i))) {
                     fUtil = true;
                 }
                 if ("IMAGE".equalsIgnoreCase(columnTypeNames.get(i))
@@ -300,7 +305,6 @@ public class TableConfiguration {
         final String decimal = "decimal";
         final String real = "real";
         final String money = "money";
-        final String smallmoney = "smallmoney";
         final String varchar = "varchar";
         final String newChar = "char";
         final String nvarchar = "nvarchar";
@@ -323,8 +327,7 @@ public class TableConfiguration {
         } else if (decimal.equalsIgnoreCase(sqlType)
                 || numeric.equalsIgnoreCase(sqlType)
                 || real.equalsIgnoreCase(sqlType)
-                || money.equalsIgnoreCase(sqlType)
-                || smallmoney.equalsIgnoreCase(sqlType)) {
+                || money.equalsIgnoreCase(sqlType)) {
             return "double";
         } else if (varchar.equalsIgnoreCase(sqlType)
                 || newChar.equalsIgnoreCase(sqlType)
@@ -343,18 +346,11 @@ public class TableConfiguration {
     }
 
     /**
-     * 出口
-     */
-    public static void main(String[] args) {
-        new TableConfiguration().start();
-    }
-
-    /**
      * 调用此方法启动
      */
     private void start() {
         Properties properties = new Properties();
-        InputStream inputStream = getClass().getResourceAsStream("../resource/reverse.properties");
+        InputStream inputStream = getClass().getResourceAsStream(propertyName);
         try {
             properties.load(inputStream);
         } catch (IOException e) {
@@ -396,5 +392,12 @@ public class TableConfiguration {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 出口
+     */
+    public static void main(String[] args) {
+        new TableConfiguration("../resource/reverse.properties").start();
     }
 }
