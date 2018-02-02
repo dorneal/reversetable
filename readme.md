@@ -29,3 +29,24 @@ package=com.neal.main.entity
 author=Neal
 
 然后再new一个TableConfiguration的带配置文件路径的有参对象，调用start()方法启动
+
+目前支持的字段类型有
+"bit"
+"tinyint"
+"smallint"
+"int"
+"bigint"
+"float"
+"numeric"
+"decimal"
+"real"
+"money"
+"varchar"
+"char"
+"nvarchar"
+"nchar"
+"text"
+"datetime"
+"image"
+"Timestamp"
+可自行修改源码进行添加，修改sqlTypeToJavaType()方法，即可
